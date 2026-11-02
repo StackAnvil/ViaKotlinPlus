@@ -36,7 +36,9 @@ JAVA_TOOL_OPTIONS="-Dviakotlinplus.test.targetVersion=1.8" \
 
 ## Notes on the Mixin port
 
-SpongePowered Mixin requires injector methods to live on the mixin class itself and, for static targets, to be static. Kotlin cannot declare a static method on a class except through a companion object, and companion objects introduce a `Companion` field that Mixin rejects in mixin classes. Mixins whose Java implementation was a class of static helpers were therefore not re-enabled in `viafabricplus.mixins.json`; they are kept in the source tree for a follow-up pass. The core client, protocol translation, 1.8 gameplay mixins and entrypoints are active.
+SpongePowered Mixin requires injector methods to live on the mixin class itself and, for static targets, to be static. Kotlin can only express static members through a companion object, and Mixin rejects the `Companion` field. The build therefore post-processes the compiled mixin classes: companion bodies are moved onto the mixin class, and a private static bridge with the original signature and Mixin annotations forwards into the body. Static fields are made private, shadow field initialisers are removed, and Kotlin's constructor NOPs are stripped, all of which Mixin requires.
+
+The transformation lives in `build.gradle.kts` and runs after `compileKotlin`. All mixins are enabled in `viafabricplus.mixins.json`.
 
 ## License
 

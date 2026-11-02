@@ -49,10 +49,12 @@ class MixinShapes {
             if (ViaFabricPlus.api().targetVersion().olderThanOrEqualTo(ProtocolVersion.v1_12_2)) {
                 for (shape in shapes) {
                     for (shapeBox in shape.toAabbs()) {
-                        maxDist = when (axis) {
-                            Direction.Axis.X -> ShapeIntersections.intersectX(moving, shapeBox, maxDist)
-                            Direction.Axis.Y -> ShapeIntersections.intersectY(moving, shapeBox, maxDist)
-                            Direction.Axis.Z -> ShapeIntersections.intersectZ(moving, shapeBox, maxDist)
+                        maxDist = if (axis == Direction.Axis.X) {
+                            ShapeIntersections.intersectX(moving, shapeBox, maxDist)
+                        } else if (axis == Direction.Axis.Y) {
+                            ShapeIntersections.intersectY(moving, shapeBox, maxDist)
+                        } else {
+                            ShapeIntersections.intersectZ(moving, shapeBox, maxDist)
                         }
                     }
                 }

@@ -31,7 +31,7 @@ private companion object {
         @JvmStatic @org.spongepowered.asm.mixin.injection.Redirect(method = ["createLookup"], at = [At(value = "INVOKE", target = "Lnet/minecraft/client/resources/SkinManager;get(Lcom/mojang/authlib/GameProfile;)Ljava/util/concurrent/CompletableFuture;")]) fun fetchGameProfileProperties(instance: net.minecraft.client.resources.SkinManager, profile: com.mojang.authlib.GameProfile): CompletableFuture<java.util.Optional<net.minecraft.world.entity.player.PlayerSkin>> {
             if (com.viaversion.viafabricplus.ViaFabricPlus.api().targetVersion().olderThanOrEqualTo(com.viaversion.viaversion.api.protocol.version.ProtocolVersion.v1_20) && !profile.properties().containsKey("textures")) {
                 return CompletableFuture.supplyAsync<com.mojang.authlib.GameProfile>(java.util.function.Supplier {
-                val profileResult: ProfileResult = net.minecraft.client.Minecraft.getInstance().services().sessionService().fetchProfile(profile.id(), true)!!
+                val profileResult: ProfileResult? = net.minecraft.client.Minecraft.getInstance().services().sessionService().fetchProfile(profile.id(), true)
                 if (profileResult == null) profile else profileResult.profile()
                 }, net.minecraft.util.Util.backgroundExecutor()).thenCompose<java.util.Optional<net.minecraft.world.entity.player.PlayerSkin>>(java.util.function.Function {profile: com.mojang.authlib.GameProfile -> instance.get(profile)})
             } else {

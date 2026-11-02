@@ -35,7 +35,7 @@ abstract class MixinEntityFluidInteraction_CurrentAccumulator {
         }
     }
     
-    @ModifyConstant(method = ["applyTo"], constant = [org.spongepowered.asm.mixin.injection.Constant(doubleValue = 1.0E-5)]) private fun changeThreshold(constant: kotlin.Double): kotlin.Double {
+    @ModifyConstant(method = ["applyTo"], constant = [org.spongepowered.asm.mixin.injection.Constant(doubleValue = 9.999999747378752E-6)]) private fun changeThreshold(constant: kotlin.Double): kotlin.Double {
         if (com.viaversion.viafabricplus.ViaFabricPlus.api().targetVersion().olderThanOrEqualTo(com.viaversion.viaversion.api.protocol.version.ProtocolVersion.v1_21_11)) {
             return 0.0
         } else {
