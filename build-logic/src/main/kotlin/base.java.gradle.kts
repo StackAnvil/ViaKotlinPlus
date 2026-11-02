@@ -2,6 +2,7 @@
 
 plugins {
     id("java-library")
+    id("org.jetbrains.kotlin.jvm")
 }
 
 group = property("project_group") as String
@@ -22,6 +23,12 @@ java {
     toolchain.languageVersion = JavaLanguageVersion.of(jvmVersion)
     sourceCompatibility = JavaVersion.toVersion(jvmVersion)
     targetCompatibility = JavaVersion.toVersion(jvmVersion)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xnullability-annotations=@org.jetbrains.annotations:ignore", "-Xjspecify-annotations=ignore")
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {

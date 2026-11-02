@@ -44,6 +44,9 @@
     ],
     "viafabricplus": [
       "com.viaversion.viafabricplus.ViaFabricPlusImpl"
+    ],
+    "preLaunch": [
+      "com.viaversion.viafabricplus.PreLaunch"
     ]
   },
   "mixins": [

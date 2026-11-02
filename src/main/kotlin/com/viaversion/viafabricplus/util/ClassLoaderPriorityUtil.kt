@@ -1,0 +1,81 @@
+ /*
+ * This file is part of ViaFabricPlus - https://github.com/ViaVersion/ViaFabricPlus
+ * Copyright (C) 2021-2026 the original authors
+ *                         - Florian Reuth <git@florianreuth.de>
+ *                         - RK_01/RaphiMC
+ * Copyright (C) 2023-2026 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.viaversion.viafabricplus.util
+
+import java.util.HashSet
+import com.viaversion.viafabricplus.util.ClassLoaderPriorityUtil
+import net.lenni0451.reflect.stream.RStream
+
+ /**
+ * Allows the user to override the Via* jar files with custom ones using the "jars" folder in the run directory
+ */
+object ClassLoaderPriorityUtil {
+    private val overridingJars: kotlin.collections.MutableSet<kotlin.String> = HashSet<kotlin.String>()
+    
+     /**
+ * Loads all overriding jars
+ */
+    fun loadOverridingJars(path: java.nio.file.Path, logger: org.apache.logging.log4j.Logger) {
+        try {
+            ClassLoaderPriorityUtil.overridingJars.clear()
+            
+            val jars: java.nio.file.Path = path.resolve("jars")
+            if (!java.nio.file.Files.exists(jars)) {
+                java.nio.file.Files.createDirectory(jars)
+                return 
+            }
+            
+            val files: kotlin.Array<java.io.File> = jars.toFile().listFiles()
+            if (files == null) {
+                return 
+            }
+            
+            val jarFiles: kotlin.Array<java.io.File> = files.filter { file: java.io.File -> file.name.endsWith(".jar") }.toTypedArray()
+            if (jarFiles.size == 0) {
+                return 
+            }
+            
+            val oldLoader: java.lang.ClassLoader = java.lang.Thread.currentThread().getContextClassLoader()
+            try {
+                val actualLoader: java.lang.ClassLoader = RStream.of(oldLoader).fields().by("urlLoader").get<java.lang.ClassLoader>()
+                java.lang.Thread.currentThread().setContextClassLoader(actualLoader)
+                
+                logger.warn("================================")
+                logger.warn("OVERRIDING JARS LOADING! THIS CAN CAUSE UNEXPECTED BEHAVIOR AND ISSUES!")
+                for (file in jarFiles) {
+                    net.lenni0451.reflect.ClassLoaders.loadToFront(file.toURI().toURL())
+                    ClassLoaderPriorityUtil.overridingJars.add(file.getName())
+                    logger.warn(" -> {}", file.getName())
+                }
+                logger.warn("================================")
+            }finally {
+                java.lang.Thread.currentThread().setContextClassLoader(oldLoader)
+            }
+        }catch (e: Throwable) {
+            logger.error("Failed to load overriding jars", e)
+        }
+    }
+    
+    fun getOverridingJars(): kotlin.collections.MutableSet<kotlin.String> {
+        return ClassLoaderPriorityUtil.overridingJars
+    }
+    
+}

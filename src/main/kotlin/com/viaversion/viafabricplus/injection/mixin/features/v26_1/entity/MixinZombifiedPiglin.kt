@@ -1,0 +1,55 @@
+ /*
+ * This file is part of ViaFabricPlus - https://github.com/ViaVersion/ViaFabricPlus
+ * Copyright (C) 2021-2026 the original authors
+ *                         - Florian Reuth <git@florianreuth.de>
+ *                         - RK_01/RaphiMC
+ * Copyright (C) 2023-2026 ViaVersion and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.viaversion.viafabricplus.injection.mixin.features.v26_1.entity
+
+import com.viaversion.viafabricplus.util.uninitialized
+
+import org.spongepowered.asm.mixin.Mixin
+import org.spongepowered.asm.mixin.injection.At
+import org.objectweb.asm.Opcodes
+import com.viaversion.viafabricplus.injection.mixin.features.v26_1.entity.MixinZombifiedPiglin
+import org.spongepowered.asm.mixin.Final
+
+@Mixin(net.minecraft.world.entity.monster.zombie.ZombifiedPiglin::class) 
+abstract class MixinZombifiedPiglin {
+
+    @org.spongepowered.asm.mixin.injection.Redirect(method = ["getDefaultDimensions"], at = [At(value = "FIELD", target = "Lnet/minecraft/world/entity/monster/zombie/ZombifiedPiglin;BABY_DIMENSIONS:Lnet/minecraft/world/entity/EntityDimensions;", opcode = Opcodes.GETSTATIC)]) private fun changeBabyDimensions(): net.minecraft.world.entity.EntityDimensions {
+        if (com.viaversion.viafabricplus.ViaFabricPlus.api().targetVersion().olderThanOrEqualTo(com.viaversion.viaversion.api.protocol.version.ProtocolVersion.v1_21_11)) {
+            return MixinZombifiedPiglin.Companion.`viaFabricPlus$baby_dimensions_r1_21_11`
+        } else if (com.viaversion.viafabricplus.ViaFabricPlus.api().targetVersion().olderThanOrEqualTo(com.viaversion.viaversion.api.protocol.version.ProtocolVersion.v26_1)) {
+            return MixinZombifiedPiglin.Companion.`viaFabricPlus$baby_dimensions_r26_1`
+        } else {
+            return MixinZombifiedPiglin.Companion.BABY_DIMENSIONS
+        }
+    }
+    
+    private companion object {
+        @field:org.spongepowered.asm.mixin.Shadow @Final 
+        @JvmField val BABY_DIMENSIONS: net.minecraft.world.entity.EntityDimensions = uninitialized()
+        @field:org.spongepowered.asm.mixin.Unique 
+        @JvmField val `viaFabricPlus$baby_dimensions_r26_1`: net.minecraft.world.entity.EntityDimensions = net.minecraft.world.entity.EntityDimensions.scalable(0.49f, 0.99f)
+        .withEyeHeight(0.78f)
+        .withAttachments(net.minecraft.world.entity.EntityAttachments.builder().attach(net.minecraft.world.entity.EntityAttachment.VEHICLE, 0.0f, 0.1875f, 0.0f))
+        
+        @field:org.spongepowered.asm.mixin.Unique 
+        @JvmField val `viaFabricPlus$baby_dimensions_r1_21_11`: net.minecraft.world.entity.EntityDimensions = net.minecraft.world.entity.EntityTypes.ZOMBIFIED_PIGLIN.getDimensions().scale(0.5f).withEyeHeight(0.97f)
+        
+    }}

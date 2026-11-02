@@ -1,80 +1,43 @@
-<!--suppress HtmlDeprecatedAttribute -->
-<div align="center">
-  <img src="src/main/resources/assets/viafabricplus/icon.png" width="150" alt="ViaFabricPlus logo">
-  <h1>ViaFabricPlus</h1>
-  <a href="https://fabricmc.net"><img src="https://img.shields.io/badge/Mod%20Loader-Fabric-lightyellow?logo=fabric" alt="Mod Loader: Fabric"></a>
-  <img src="https://img.shields.io/badge/Environment-Client-purple" alt="Environment: Client">
-  <a href="https://discord.gg/viaversion"><img src="https://img.shields.io/discord/316206679014244363?color=0098DB&label=Discord&logo=discord&logoColor=0098DB" alt="Discord"></a><br/>
-  <a href="https://modrinth.com/mod/viafabricplus"><img src="https://img.shields.io/badge/dynamic/json?color=158000&label=downloads&prefix=+%20&query=downloads&url=https://api.modrinth.com/v2/project/rIC2XJV4&logo=modrinth" alt="Modrinth Downloads"></a>
-  <a href="https://curseforge.com/minecraft/mc-mods/viafabricplus"><img src="https://cf.way2muchnoise.eu/full_830604_downloads.svg" alt="CurseForge Downloads"></a>
-  <a href="https://github.com/ViaVersion/ViaFabricPlus/actions/workflows/build.yml"><img src="https://github.com/ViaVersion/ViaFabricPlus/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
+# ViaKotlinPlus
 
-  <p><strong>Minecraft Fabric mod that allows you to join <em>every</em> Minecraft server version (Classic, Alpha, Beta, Release, April Fools)</strong></p>
-</div>
+ViaKotlinPlus is a Kotlin rewrite of [ViaFabricPlus](https://github.com/ViaVersion/ViaFabricPlus) 5.1.4. Every source file under `src/` and `viafabricplus-api/src/` is Kotlin; no `.java` sources remain.
 
-**ViaFabricPlus** is a Minecraft mod for [Fabric](https://fabricmc.net/) that builds on
-the [ViaVersion plugin](https://github.com/ViaVersion/ViaVersion).
-It lets you connect to servers from almost every Minecraft version while fixing issues that the original project
-couldn't.
+The mod keeps ViaFabricPlus' purpose: a Fabric client mod that lets a modern Minecraft client join servers running older Minecraft versions through ViaVersion, ViaBackwards, ViaLegacy and ViaAprilFools.
 
-These fixes make older servers feel much closer to how they originally played, with improvements to movement, block and
-entity interactions, graphics, and more. In short, it recreates the classic Minecraft experience on today's client.
+## Requirements
 
-## Important to know
+- Java 25
+- A Minecraft 26.3 Fabric development environment (the Gradle wrapper and Loom handle this)
 
-- Works **only with the newest Minecraft client version**
-- Runs **only on [Fabric](https://fabricmc.net/)**. (There won't be a Forge or NeoForge version)
-- **Multiplayer only** – it does not affect singleplayer worlds
-- **Clientside only** – it does not run on Multiplayer servers
-- **No cross-version resource packs** – resource packs from older versions are not supported
-- If you want to play using **older Minecraft clients**, you should use the
-  original [ViaFabric](https://viaversion.com/fabric) instead.
-  For a detailed comparison between the two projects, check out
-  the [ViaFabric vs ViaFabricPlus section](https://github.com/ViaVersion/ViaFabric?tab=readme-ov-file#differences-with-viafabricplus).
+## Build
 
-## How to use
+```bash
+./gradlew build
+```
 
-- [Step-by-step installation and usage guide](docs/USAGE.md)
-- Found a bug? Please report it on the [issue tracker](https://github.com/ViaVersion/ViaFabricPlus/issues)
-- Got questions? Join the [ViaVersion Discord](https://discord.gg/viaversion)
+The built mod is in `build/libs/`.
 
-### Supported Client versions
+## Run
 
-| **Version**                    | **Feature Updates** | **Bug Fixes** |
-|--------------------------------|---------------------|---------------|
-| Minecraft 26.3                 | Yes                 | Yes           |
-| Minecraft 26.2                 | No                  | Yes           |
-| Minecraft 26.1.x *(and older)* | No                  | No            |
+```bash
+./gradlew runClient
+```
 
-### Supported Server versions
+## Verified
 
-- Release (1.0.0–26.3*)
-- Beta (b1.0 – b1.8.1)
-- Alpha (a1.0.15 – a1.2.6)
-- Classic (c0.0.15 – c0.30 including [CPE](https://wiki.vg/Classic_Protocol_Extension))
-- April Fools (3D Shareware, 20w14infinite, 25w14craftmine)
-- Combat Snapshots (Combat Test 8c)
+The rewrite was built and launched against a locally running offline Spigot 1.8.8 server. A client joined the server, received the world and stayed in game.
 
-*[Support for new Mojang releases is usually added within a few days](https://github.com/ViaVersion/ViaVersion#snapshot-support)
+For repeatable testing, the JVM property `viakotlinplus.test.targetVersion` forces the target protocol version before connecting:
 
-## Bedrock Edition
+```bash
+JAVA_TOOL_OPTIONS="-Dviakotlinplus.test.targetVersion=1.8" \
+  ./gradlew runClient --args="--quickPlayMultiplayer 127.0.0.1:25565"
+```
 
-Support for Minecraft: Bedrock Edition servers and Realms is available through the separate
-[ViaFabricPlus Bedrock](https://github.com/florianreuth/viafabricplus-bedrock) addon, which is based on
-[ViaBedrock](https://github.com/RaphiMC/ViaBedrock).
+## Notes on the Mixin port
 
-## For Developers & Contributors
+SpongePowered Mixin requires injector methods to live on the mixin class itself and, for static targets, to be static. Kotlin cannot declare a static method on a class except through a companion object, and companion objects introduce a `Companion` field that Mixin rejects in mixin classes. Mixins whose Java implementation was a class of static helpers were therefore not re-enabled in `viafabricplus.mixins.json`; they are kept in the source tree for a follow-up pass. The core client, protocol translation, 1.8 gameplay mixins and entrypoints are active.
 
-- [Contribution guide & dev setup](CONTRIBUTING.md)
-- [API docs & integration examples](docs/DEVELOPER_API.md)
+## License
 
-## Credits
-
-Huge thanks to all our [contributors](https://github.com/ViaVersion/ViaFabricPlus/graphs/contributors) who made this
-project possible.
-
-## Disclaimer
-
-We cannot guarantee this mod will be allowed on every server.
-Some servers may treat it as suspicious and flag it with anti-cheat plugins.
-**Use responsibly and at your own risk!**
+GPL-3.0, inherited from ViaFabricPlus. See `LICENSE`.
